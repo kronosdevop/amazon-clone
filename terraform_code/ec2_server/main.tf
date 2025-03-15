@@ -11,6 +11,16 @@ provider "aws" {
   region = var.region_name
 }
 
+# Create Subnet in the default VPC
+resource "aws_subnet" "default_subnet" {
+  vpc_id            = "vpc-0dea94da69bc149ba"
+  cidr_block        = "172.31.1.0/24"
+  availability_zone = "us-east-2a"  # adjust as needed for your region
+  tags = {
+    Name = "default-subnet-us-east-2a"
+  }
+}
+
 # STEP1: CREATE SG
 resource "aws_security_group" "my-sg" {
   name        = "JENKINS-SERVER-SG"
@@ -137,7 +147,9 @@ resource "aws_security_group" "my-sg" {
 resource "aws_instance" "my-ec2" {
   ami           = var.ami   
   instance_type = var.instance_type
-  key_name      = var.key_name        
+  key_name      = var.key_name 
+  subnet_id     = aws_subnet.default_subnet.id   
+  associate_public_ip_address = true   
   vpc_security_group_ids = [aws_security_group.my-sg.id]
   
   root_block_device {
